@@ -6,7 +6,6 @@ frontend/dist/
 backend/public/
 dist/
 backend/app-meta.json
-assets/icon.ico
 
 # ── Python ────────────────────
 __pycache__/

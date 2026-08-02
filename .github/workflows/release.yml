@@ -49,32 +49,33 @@ jobs:
             dist/NewerTabX-Setup-*.exe
           if-no-files-found: error
 
-  build-macos:
-    runs-on: macos-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - uses: actions/setup-node@v4
-        with:
-          node-version: 20
-
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Build backend (frontend + Nuitka standalone)
-        run: build/build-backend.sh "${APP_VERSION#v}" "$GITHUB_REPOSITORY"
-
-      - name: Package tar.gz
-        run: |
-          cd dist
-          tar -czf "NewerTabX-${APP_VERSION#v}-macos.tar.gz" NewerTabX
-
-      - uses: actions/upload-artifact@v4
-        with:
-          name: macos
-          path: dist/NewerTabX-*-macos.tar.gz
-          if-no-files-found: error
+  # macOS 构建暂时停用
+  # build-macos:
+  #   runs-on: macos-latest
+  #   steps:
+  #     - uses: actions/checkout@v4
+  #
+  #     - uses: actions/setup-node@v4
+  #       with:
+  #         node-version: 20
+  #
+  #     - uses: actions/setup-python@v5
+  #       with:
+  #         python-version: "3.12"
+  #
+  #     - name: Build backend (frontend + Nuitka standalone)
+  #       run: build/build-backend.sh "${APP_VERSION#v}" "$GITHUB_REPOSITORY"
+  #
+  #     - name: Package tar.gz
+  #       run: |
+  #         cd dist
+  #         tar -czf "NewerTabX-${APP_VERSION#v}-macos.tar.gz" NewerTabX
+  #
+  #     - uses: actions/upload-artifact@v4
+  #       with:
+  #         name: macos
+  #         path: dist/NewerTabX-*-macos.tar.gz
+  #         if-no-files-found: error
 
   build-extension:
     runs-on: ubuntu-latest
@@ -91,7 +92,7 @@ jobs:
           if-no-files-found: error
 
   release:
-    needs: [build-windows, build-macos, build-extension]
+    needs: [build-windows, build-extension]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/download-artifact@v4

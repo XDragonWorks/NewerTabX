@@ -22,38 +22,34 @@ try {
 }
 
 Write-Host "[3/4] Installing Python dependencies"
-python -m pip install -r backend\requirements.txt nuitka pillow
+python -m pip install -r backend\requirements.txt pyinstaller pillow
 if ($LASTEXITCODE) { exit 1 }
 python build\make-icon.py
 if ($LASTEXITCODE) { exit 1 }
 
-Write-Host "[4/4] Nuitka standalone build (first run takes several minutes)"
-$nuitkaArgs = @(
-    "--standalone",
-    "--windows-console-mode=disable",
-    "--windows-icon-from-ico=assets/icon.ico",
-    "--include-package=uvicorn",
-    "--include-package=wsgidav",
-    "--include-package-data=wsgidav",
-    "--nofollow-import-to=tkinter",
-    "--nofollow-import-to=turtle",
-    "--nofollow-import-to=idlelib",
-    "--nofollow-import-to=unittest",
-    "--nofollow-import-to=doctest",
-    "--nofollow-import-to=pydoc",
-    "--include-data-dir=backend/public=public",
-    "--include-data-file=backend/app-meta.json=app-meta.json",
-    "--assume-yes-for-downloads",
-    "--output-dir=dist",
-    "--output-filename=NewerTabX.exe",
+Write-Host "[4/4] PyInstaller build (usually under 2 minutes)"
+$pyinstallerArgs = @(
+    "--noconfirm", "--clean",
+    "--distpath", "dist",
+    "--workpath", ".pyinstaller-build",
+    "--name", "NewerTabX",
+    "--windowed",
+    "--icon", "assets/icon.ico",
+    "--add-data", "backend/public;public",
+    "--add-data", "backend/app-meta.json;.",
+    "--collect-all", "uvicorn",
+    "--collect-all", "wsgidav",
+    "--collect-all", "fastapi",
+    "--collect-all", "starlette",
+    "--collect-all", "pydantic",
+    "--collect-submodules", "httpx",
+    "--collect-submodules", "anyio",
     "backend\main.py"
 )
-python -m nuitka @nuitkaArgs
+python -m PyInstaller @pyinstallerArgs
 if ($LASTEXITCODE) { exit 1 }
-
 Remove-Item assets\icon.ico -ErrorAction SilentlyContinue
-if (Test-Path dist\NewerTabX) { Remove-Item dist\NewerTabX -Recurse -Force }
-Move-Item dist\main.dist dist\NewerTabX
+Remove-Item .pyinstaller-build, NewerTabX.spec -Recurse -Force -ErrorAction SilentlyContinue
 
 Write-Host ""
 Write-Host "Build complete: dist\NewerTabX\NewerTabX.exe"

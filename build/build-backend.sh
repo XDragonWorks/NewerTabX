@@ -26,41 +26,29 @@ echo "[2/4] Building frontend"
 
 echo "[3/4] Installing Python dependencies"
 PYTHON="$(command -v python3 || command -v python)"
-"$PYTHON" -m pip install -r backend/requirements.txt nuitka pillow
+"$PYTHON" -m pip install -r backend/requirements.txt pyinstaller pillow
 "$PYTHON" build/make-icon.py
 
-echo "[4/4] Nuitka standalone build (first run takes several minutes)"
-OUTPUT_NAME="NewerTabX"
-EXTRA_FLAGS=()
-case "$(uname -s)" in
-  MINGW*|MSYS*|CYGWIN*)
-    OUTPUT_NAME="NewerTabX.exe"
-    EXTRA_FLAGS+=(--windows-console-mode=disable --windows-icon-from-ico=assets/icon.ico)
-    ;;
-esac
-"$PYTHON" -m nuitka \
-  --standalone \
-  --include-package=uvicorn \
-  --include-package=wsgidav \
-  --include-package-data=wsgidav \
-  --nofollow-import-to=tkinter \
-  --nofollow-import-to=turtle \
-  --nofollow-import-to=idlelib \
-  --nofollow-import-to=unittest \
-  --nofollow-import-to=doctest \
-  --nofollow-import-to=pydoc \
-  --include-data-dir=backend/public=public \
-  --include-data-file=backend/app-meta.json=app-meta.json \
-  --assume-yes-for-downloads \
-  --output-dir=dist \
-  --output-filename="$OUTPUT_NAME" \
-  "${EXTRA_FLAGS[@]}" \
+echo "[4/4] PyInstaller build (usually under 2 minutes)"
+"$PYTHON" -m PyInstaller --noconfirm --clean \
+  --distpath dist \
+  --workpath .pyinstaller-build \
+  --name NewerTabX \
+  --windowed \
+  --icon assets/icon.ico \
+  --add-data "backend/public;public" \
+  --add-data "backend/app-meta.json;." \
+  --collect-all uvicorn \
+  --collect-all wsgidav \
+  --collect-all fastapi \
+  --collect-all starlette \
+  --collect-all pydantic \
+  --collect-submodules httpx \
+  --collect-submodules anyio \
   backend/main.py
 
 rm -f assets/icon.ico
-
-rm -rf dist/NewerTabX
-mv dist/main.dist dist/NewerTabX
+rm -rf .pyinstaller-build NewerTabX.spec
 
 echo
 echo "Build complete: dist/NewerTabX/"
