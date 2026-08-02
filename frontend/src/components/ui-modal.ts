@@ -2,6 +2,7 @@ import { getIconSvg } from '../utils/icons';
 import { getPerformanceConfig } from '../utils/performance';
 
 let lastClickPos: { x: number; y: number } = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+let modalStackSequence = 0;
 
 window.addEventListener('click', (e: MouseEvent) => {
   lastClickPos = { x: e.clientX, y: e.clientY };
@@ -11,6 +12,8 @@ export class UIModal extends HTMLElement {
   private shadow: ShadowRoot;
   private isOpen: boolean = false;
   private isClosing: boolean = false;
+  private stackBase: number = 2000;
+  private sourceAnimationEnabled: boolean = true;
   private lastSourceRect: { left: number; top: number; width: number; height: number } | null = null;
   private lastSourceElement: HTMLElement | null = null;
   private originalSourceStyle: {
@@ -47,9 +50,10 @@ export class UIModal extends HTMLElement {
     }
   }
 
-  public open(source?: HTMLElement | MouseEvent) {
+  public open(source?: HTMLElement | MouseEvent, options?: { sourceAnimation?: boolean }) {
     if (this.isClosing) return;
     this.isOpen = true;
+    this.sourceAnimationEnabled = options?.sourceAnimation !== false;
 
     if (!this.hasAttribute('open')) {
       this.setAttribute('open', '');
@@ -60,6 +64,12 @@ export class UIModal extends HTMLElement {
     const panel = this.shadow.querySelector('.modal-panel') as HTMLDivElement | null;
 
     if (!overlay || !container || !panel) return;
+
+    // 叠层弹窗：每次打开分配递增的 z-index 基线，保证后开的 modal 的
+    // backdrop 能压住先开的 modal 面板
+    this.stackBase = 2000 + (modalStackSequence++) * 10;
+    overlay.style.zIndex = String(this.stackBase);
+    container.style.zIndex = String(this.stackBase + 1);
 
     // 打开时解除穿透拦截，恢复正常的交互与 pointer-events
     overlay.style.pointerEvents = 'auto';
@@ -85,7 +95,7 @@ export class UIModal extends HTMLElement {
 
     const perfConfig = getPerformanceConfig();
     const enableFLIP = perfConfig.enableFlipModal && perfConfig.preset !== 'low';
-    const enableFlipSource = enableFLIP && perfConfig.enableFlipSourceAnimation && this.lastSourceElement !== null && this.lastSourceElement.isConnected;
+    const enableFlipSource = enableFLIP && this.sourceAnimationEnabled && perfConfig.enableFlipSourceAnimation && this.lastSourceElement !== null && this.lastSourceElement.isConnected;
 
     if (enableFLIP && this.lastSourceRect) {
       this.playOpenFLIP(panel, this.lastSourceRect, enableFlipSource);
@@ -131,7 +141,7 @@ export class UIModal extends HTMLElement {
 
     const perfConfig = getPerformanceConfig();
     const enableFLIP = perfConfig.enableFlipModal && perfConfig.preset !== 'low';
-    const enableFlipSource = enableFLIP && perfConfig.enableFlipSourceAnimation && this.lastSourceElement !== null && this.lastSourceElement.isConnected;
+    const enableFlipSource = enableFLIP && this.sourceAnimationEnabled && perfConfig.enableFlipSourceAnimation && this.lastSourceElement !== null && this.lastSourceElement.isConnected;
 
     overlay.style.transition = 'opacity var(--duration-slow) var(--ease-fluent-standard)';
     overlay.style.opacity = '0';
@@ -170,12 +180,14 @@ export class UIModal extends HTMLElement {
       overlay.style.opacity = '';
       overlay.style.transition = '';
       overlay.style.pointerEvents = '';
+      overlay.style.zIndex = '';
     }
     if (container) {
       container.classList.remove('visible');
       container.style.opacity = '';
       container.style.transition = '';
       container.style.pointerEvents = '';
+      container.style.zIndex = '';
     }
     if (panel) {
       panel.classList.remove('visible');
@@ -259,7 +271,7 @@ export class UIModal extends HTMLElement {
       if (computedPos === 'static') {
         sourceEl.style.position = 'relative';
       }
-      sourceEl.style.zIndex = '2000';
+      sourceEl.style.zIndex = String(this.stackBase);
 
       const scaleXSource = sourceRect.width !== 0 ? targetRect.width / sourceRect.width : 1;
       const scaleYSource = sourceRect.height !== 0 ? targetRect.height / sourceRect.height : 1;
@@ -332,7 +344,7 @@ export class UIModal extends HTMLElement {
       if (computedPos === 'static') {
         sourceEl.style.position = 'relative';
       }
-      sourceEl.style.zIndex = '2000';
+      sourceEl.style.zIndex = String(this.stackBase);
 
       sourceEl.style.transition = 'none';
       sourceEl.style.transformOrigin = 'center center';
