@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>NewerTabX</title>
+  <meta name="description" content="A customizable Fluent Design browser navigation page supporting AI-generated web-component cards, mica acrylic themes, and WebDAV backend sync." />
+  <style>
+    html {
+      background-color: #141414;
+      opacity: 0;
+      transition: opacity 0s;
+    }
+    html.app-ready {
+      opacity: 1;
+    }
+  </style>
+  <link rel="stylesheet" href="./src/styles/main.css" />
+</head>
+<body>
+  <div id="app"></div>
+  <script type="module" src="./src/main.ts"></script>
+</body>
+</html>

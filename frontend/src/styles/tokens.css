@@ -1,0 +1,132 @@
+/* Fluent Design Tokens & Design System (单一数据源 Single Source of Truth) */
+
+:root {
+  /* 1. 动画曲线与时间 */
+  --ease-fluent-standard: cubic-bezier(0.1, 0.9, 0.2, 1.0);
+  --ease-fluent-accelerate: cubic-bezier(0.9, 0.1, 1.0, 0.2);
+  --ease-fluent-decelerate: cubic-bezier(0.0, 0.0, 0.2, 1.0);
+  --ease-fluent-spring: cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  
+  --duration-fast: 180ms;
+  --duration-normal: 280ms;
+  --duration-slow: 450ms;
+  --duration-very-slow: 680ms;
+  --duration-shimmer: 7s;
+
+  /* 2. 圆角规范 */
+  --radius-sm: 6px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-xl: 24px;
+
+  /* 3. 模糊半径系统 */
+  --blur-background: 8px;
+  --blur-acrylic: 16px;
+  --blur-card: 16px;
+  --blur-overlay: 4px;
+
+  /* 4. 遮罩层 Background */
+  --color-overlay-bg: rgba(0, 0, 0, 0.35);
+  color-scheme: light;
+
+  --card-min-width: 280px;
+  --card-row-height: 260px;
+  --card-gap: 24px;
+
+  /* 5. 亮色主题 Colors */
+  --color-bg-base: #f0f3f8;
+  --color-surface-acrylic: rgba(255, 255, 255, 0.62);
+  --color-surface-mica: #e8edf5;
+  --color-card-bg: var(--color-surface-acrylic);
+  --color-card-border: rgba(0, 0, 0, 0.14);
+  --color-card-border-hover: color-mix(in srgb, var(--color-accent-primary) 65%, transparent);
+  --color-text-primary: #1b1b1b;
+  --color-text-secondary: #5d5d5d;
+  --color-accent-primary: #0078d4;
+  --color-accent-hover: #106ebe;
+  --color-accent-glow: rgba(0, 120, 212, 0.25);
+
+  --shadow-fluent-card: 0 6px 20px rgba(0, 0, 0, 0.08), 0 1px 4px rgba(0, 0, 0, 0.05);
+  --shadow-fluent-modal: 0 16px 40px rgba(0, 0, 0, 0.16), 0 4px 12px rgba(0, 0, 0, 0.08);
+
+  --shimmer-color-start: rgba(255, 255, 255, 0.08);
+  --shimmer-color-mid: rgba(255, 255, 255, 0.03);
+}
+
+/* 暗色主题配置 */
+[data-theme="dark"] {
+  color-scheme: dark;
+  --color-bg-base: #181818;
+  --color-surface-acrylic: rgba(28, 28, 28, 0.65);
+  --color-surface-mica: #242424;
+  --color-card-bg: var(--color-surface-acrylic);
+  --color-card-border: rgba(255, 255, 255, 0.16);
+  --color-card-border-hover: color-mix(in srgb, var(--color-accent-primary) 65%, transparent);
+  --color-text-primary: #f5f5f5;
+  --color-text-secondary: #aaaaaa;
+  --color-accent-primary: #4cc2ff;
+  --color-accent-hover: #60cdff;
+  --color-accent-glow: rgba(76, 194, 255, 0.35);
+
+  --shadow-fluent-card: 0 6px 24px rgba(0, 0, 0, 0.4), 0 1px 4px rgba(0, 0, 0, 0.25);
+  --shadow-fluent-modal: 0 20px 56px rgba(0, 0, 0, 0.6), 0 4px 16px rgba(0, 0, 0, 0.35);
+
+  --shimmer-color-start: rgba(255, 255, 255, 0.08);
+  --shimmer-color-mid: rgba(255, 255, 255, 0.015);
+}
+
+/* 纯 CSS 数据驱动控制材质与性能特效 [data-material], [data-blur], [data-overlay-blur], [data-shimmer] */
+[data-material="acrylic"] {
+  --color-card-bg: var(--color-surface-acrylic) !important;
+}
+
+[data-material="opaque"] {
+  --blur-acrylic: 0px !important;
+  --blur-card: 0px !important;
+  --color-card-bg: var(--color-bg-base) !important;
+  --color-surface-acrylic: var(--color-bg-base) !important;
+}
+
+[data-material="mica"] {
+  --blur-acrylic: 0px !important;
+  --blur-card: 0px !important;
+  --color-card-bg: var(--color-surface-mica) !important;
+  --color-surface-acrylic: var(--color-surface-mica) !important;
+}
+
+[data-overlay-blur="false"] {
+  --blur-overlay: 0px !important;
+}
+
+[data-blur="false"] {
+  --blur-acrylic: 0px !important;
+  --blur-card: 0px !important;
+}
+
+/* 全局 Fluent 统一 Webkit 自定义精细滚动条 */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: rgba(0, 0, 0, 0.15);
+  border-radius: 4px;
+  transition: background-color var(--duration-fast) var(--ease-fluent-standard);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.2);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.4);
+}

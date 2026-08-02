@@ -1,0 +1,113 @@
+name: release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: write
+
+env:
+  APP_VERSION: ${{ github.ref_name }}
+
+jobs:
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build backend (frontend + Nuitka standalone)
+        shell: bash
+        run: build/build-backend.sh "${APP_VERSION#v}" "$GITHUB_REPOSITORY"
+
+      - name: Package portable zip
+        shell: bash
+        run: |
+          echo portable > dist/NewerTabX/portable.txt
+          cd dist
+          7z a "NewerTabX-portable-${APP_VERSION#v}-windows.zip" NewerTabX
+
+      - name: Build installer (Inno Setup)
+        run: |
+          choco install innosetup --no-progress -y
+          & "C:\Program Files (x86)\Inno Setup 6\ISCC.exe" "/DAppVersion=$($env:APP_VERSION -replace '^v','')" build\installer.iss
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows
+          path: |
+            dist/NewerTabX-portable-*-windows.zip
+            dist/NewerTabX-Setup-*.exe
+          if-no-files-found: error
+
+  build-macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Build backend (frontend + Nuitka standalone)
+        run: build/build-backend.sh "${APP_VERSION#v}" "$GITHUB_REPOSITORY"
+
+      - name: Package tar.gz
+        run: |
+          cd dist
+          tar -czf "NewerTabX-${APP_VERSION#v}-macos.tar.gz" NewerTabX
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos
+          path: dist/NewerTabX-*-macos.tar.gz
+          if-no-files-found: error
+
+  build-extension:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Package browser extension
+        run: build/build-extension.sh "${APP_VERSION#v}"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: extension
+          path: dist/NewerTabX-extension-*.zip
+          if-no-files-found: error
+
+  release:
+    needs: [build-windows, build-macos, build-extension]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: Generate checksums
+        run: |
+          cd artifacts
+          find . -type f \( -name "*.zip" -o -name "*.exe" -o -name "*.tar.gz" \) \
+            -exec sha256sum {} + > checksums.txt
+          cat checksums.txt
+
+      - name: Create GitHub Release
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          cd artifacts
+          gh release create "$GITHUB_REF_NAME" ./*/* ./checksums.txt --generate-notes

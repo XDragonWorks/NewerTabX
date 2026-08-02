@@ -1,0 +1,84 @@
+@import './tokens.css';
+
+/* 基础 Fluent 控件统一 CSS */
+
+.fluent-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 8px 16px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  outline: none;
+  border: 1px solid var(--color-card-border);
+  background: var(--color-card-bg);
+  color: var(--color-text-primary);
+  backdrop-filter: blur(var(--blur-card));
+  transition: background-color var(--duration-normal) var(--ease-fluent-standard),
+              border-color var(--duration-normal) var(--ease-fluent-standard),
+              box-shadow var(--duration-normal) var(--ease-fluent-standard),
+              transform var(--duration-fast) var(--ease-fluent-standard);
+}
+
+/* Hover 规则：仅高光与边框/阴影变化，取消任何 transform: scale */
+.fluent-btn:hover {
+  background: var(--color-surface-acrylic);
+  border-color: var(--color-card-border-hover);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.fluent-btn:active {
+  transform: scale(0.98);
+}
+
+.fluent-btn.primary {
+  background: var(--color-accent-primary);
+  color: #ffffff;
+  border-color: transparent;
+}
+
+.fluent-btn.primary:hover {
+  background: var(--color-accent-hover);
+  box-shadow: 0 0 14px var(--color-accent-glow);
+}
+
+/* 统一输入框 */
+.fluent-input {
+  width: 100%;
+  padding: 8px 12px;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  outline: none;
+  border: 1px solid var(--color-card-border);
+  background: var(--color-card-bg);
+  color: var(--color-text-primary);
+  backdrop-filter: blur(var(--blur-card));
+  transition: border-color var(--duration-normal) var(--ease-fluent-standard),
+              box-shadow var(--duration-normal) var(--ease-fluent-standard);
+}
+
+.fluent-input:focus {
+  border-color: var(--color-accent-primary);
+  box-shadow: 0 0 0 2px var(--color-accent-glow);
+}
+
+/* 统一卡片基础类 */
+.fluent-card-container {
+  border-radius: var(--radius-md);
+  background: var(--color-card-bg);
+  border: 1px solid var(--color-card-border);
+  box-shadow: var(--shadow-fluent-card);
+  backdrop-filter: blur(var(--blur-card));
+  overflow: hidden;
+  transition: box-shadow var(--duration-normal) var(--ease-fluent-standard),
+              border-color var(--duration-normal) var(--ease-fluent-standard);
+}
+
+/* Hover 取消 scale 缩放 */
+.fluent-card-container:hover {
+  box-shadow: var(--shadow-fluent-modal);
+  border-color: var(--color-card-border-hover);
+}

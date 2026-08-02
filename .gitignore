@@ -1,0 +1,36 @@
+# ── 依赖 ──────────────────────
+node_modules/
+
+# ── 构建 ──────────────────────
+frontend/dist/
+backend/public/
+dist/
+backend/app-meta.json
+assets/icon.ico
+
+# ── Python ────────────────────
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+
+# ── 运行时数据 ─────────────────
+backend/data/
+*.log
+
+# ── 密钥与环境变量 ─────────────
+.env
+.env.*
+*.local
+*.pem
+*.key
+
+# ── 编辑器 / 系统 ─────────────
+.idea/
+.vscode/
+*.swp
+.DS_Store
+Thumbs.db
+.agents
+tasks/
