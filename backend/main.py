@@ -954,6 +954,40 @@ class CacheDownloadRequest(BaseModel):
     autoExtend: Optional[bool] = None
 
 
+_IMAGE_MAGIC_SIGNATURES = (
+    b"\x89PNG\r\n\x1a\n",
+    b"\xff\xd8\xff",
+    b"GIF87a",
+    b"GIF89a",
+    b"\x00\x00\x01\x00",
+    b"BM",
+)
+
+
+def _sniff_is_image(head: bytes) -> bool:
+    if any(head.startswith(sig) for sig in _IMAGE_MAGIC_SIGNATURES):
+        return True
+    if head[:4] == b"RIFF" and head[8:12] == b"WEBP":
+        return True
+    if head[4:8] == b"ftyp" and head[8:12] in (b"avif", b"avis"):
+        return True
+    if head.lstrip().startswith(b"<svg"):
+        return True
+    return False
+
+
+def _is_valid_image_content(content: bytes, content_type: str) -> bool:
+    if not content:
+        return False
+    head = content[:512]
+    if _sniff_is_image(head):
+        return True
+    if head.lstrip().startswith(b"<"):
+        return False
+    mime = content_type.split(";")[0].strip().lower()
+    return mime.startswith("image/")
+
+
 @app.post("/api/data/cache/download")
 async def download_cache_image(download_req: CacheDownloadRequest, request: Request):
     async with _proxy_semaphore:
@@ -1008,7 +1042,17 @@ async def _download_cache_image_impl(download_req: CacheDownloadRequest, request
                 detail=f"Failed to download image from remote URL (HTTP {response.status_code})",
             )
 
-        content_type = response.headers.get("content-type", "image/jpeg")
+        content_type = response.headers.get("content-type", "")
+        if not _is_valid_image_content(response.content, content_type):
+            logger.warning(
+                "Rejected non-image content from %s (content-type: %s, %s bytes)",
+                target_url,
+                content_type,
+                len(response.content),
+            )
+            raise HTTPException(status_code=502, detail="Remote URL did not return a valid image")
+        if not content_type:
+            content_type = "image/jpeg"
         if "." not in Path(key).name:
             ext = mimetypes.guess_extension(content_type.split(";")[0])
             if ext is not None:
@@ -1044,6 +1088,13 @@ def _check_existing_cache(
     if not cache_path.is_file() or not meta_path.is_file():
         return None
     try:
+        with cache_path.open("rb") as cache_file:
+            head = cache_file.read(512)
+        if not _sniff_is_image(head):
+            logger.warning("Evicting cached non-image content for key %s", key)
+            cache_path.unlink(missing_ok=True)
+            meta_path.unlink(missing_ok=True)
+            return None
         meta = json.loads(meta_path.read_text(encoding="utf-8"))
         if "expire_time" in meta and float(meta["expire_time"]) > now_ms:
             return {
