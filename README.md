@@ -1,7 +1,9 @@
-<div style="margin: auto; padding-top: 32px; text-align: center;">
-    <img src="./assets/icon.png" width="48" height="48" style="display: block; margin: 0 auto 8px;">
-    <h1 style="border: none; margin-bottom: 0px;">NewerTabX</h1>
-    <span>高可自定义性的新生代浏览器开始页</span>
+<div align="center">
+    <br>
+    <img src="./assets/icon.png" width="48" height="48" alt="icon">
+    <h1>NewerTabX</h1>
+    <p>高可自定义性的新生代浏览器开始页</p>
+    <br>
 </div>
 
 ## 功能与特性
