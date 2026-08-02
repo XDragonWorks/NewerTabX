@@ -35,6 +35,7 @@ jobs:
           echo portable > dist/NewerTabX/portable.txt
           cd dist
           7z a "NewerTabX-portable-${APP_VERSION#v}-windows.zip" NewerTabX
+          rm -f NewerTabX/portable.txt
 
       - name: Build installer (Inno Setup)
         run: |

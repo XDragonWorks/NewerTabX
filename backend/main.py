@@ -32,6 +32,10 @@ from pydantic import BaseModel, Field
 from starlette.middleware.wsgi import WSGIMiddleware
 from wsgidav.wsgidav_app import WsgiDAVApp
 
+if sys.stdout is None:
+    sys.stdout = open(os.devnull, "w")
+if sys.stderr is None:
+    sys.stderr = open(os.devnull, "w")
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("backend")
