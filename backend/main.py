@@ -40,15 +40,10 @@ APP_DIR = Path(__file__).resolve().parent
 
 
 def _is_packaged() -> bool:
-    """PyInstaller 设置 sys.frozen；Nuitka 注入 __compiled__ 全局变量。"""
-    return getattr(sys, "frozen", False) or "__compiled__" in globals()
+    return getattr(sys, "frozen", False)
 
 
 def _executable_path() -> Path:
-    """打包后返回真正的 exe 路径（Nuitka onefile 通过环境变量暴露引导程序路径）。"""
-    onefile_parent = os.environ.get("NUITKA_ONEFILE_PARENT")
-    if onefile_parent:
-        return Path(onefile_parent)
     return Path(sys.executable)
 
 

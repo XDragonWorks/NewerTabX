@@ -25,7 +25,7 @@ jobs:
         with:
           python-version: "3.12"
 
-      - name: Build backend (frontend + Nuitka standalone)
+      - name: Build backend (frontend + PyInstaller)
         shell: bash
         run: build/build-backend.sh "${APP_VERSION#v}" "$GITHUB_REPOSITORY"
 
@@ -63,7 +63,7 @@ jobs:
   #       with:
   #         python-version: "3.12"
   #
-  #     - name: Build backend (frontend + Nuitka standalone)
+  #     - name: Build backend (frontend + PyInstaller)
   #       run: build/build-backend.sh "${APP_VERSION#v}" "$GITHUB_REPOSITORY"
   #
   #     - name: Package tar.gz
